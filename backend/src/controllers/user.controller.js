@@ -15,7 +15,9 @@ const register = asyncHandler(async (req, res) => {
   }
   const user = new User({ username, password });
   await user.save();
-  const createdUser = await User.findById(user._id).select("-password -refreshToken");
+  const createdUser = await User.findById(user._id).select(
+    "-password -refreshToken"
+  );
   if (!createdUser) {
     throw new ApiError(500, "Something went Wrong while creating the user");
   }
@@ -52,4 +54,25 @@ const login = asyncHandler(async (req, res) => {
     );
 });
 
-export { register, login };
+const logout = asyncHandler(async (req, res) => {
+  if (!req.user || !req.user._id) {
+    throw new ApiError(401, "User is not authenticated");
+  }
+  const user = await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      refreshToken: null,
+    },
+    {
+      new: true,
+    }
+  );
+    if (!user) {
+        throw new ApiError(500, "Something went wrong while logging out");
+    }
+    res.clearCookie("accessToken", cookieOptions);
+    res.clearCookie("refreshToken", cookieOptions);
+    return res.status(200).json(new ApiResponse(200, "User logged out successfully"));
+});
+
+export { register, login, logout };
