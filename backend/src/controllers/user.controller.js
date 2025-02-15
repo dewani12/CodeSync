@@ -5,15 +5,21 @@ import ApiResponse from "../utils/ApiResponse.js";
 import { generateAccessandRefreshTokens } from "../utils/generateTokens.js";
 import { cookieOptions } from "../constants.js";
 
-const register = asyncHandler(async (req, res) => {
-  const { username, password } = req.body;
-  if (!username || !password) {
-    throw new ApiError(400, "Username and password are required fields");
+const signup = asyncHandler(async (req, res) => {
+  const { username, password, email } = req.body;
+  if (!username || !password || !email) {
+    throw new ApiError(400, "Username, Email and password are required fields");
   }
-  if (await User.exists({ username })) {
-    throw new ApiError(409, "Username already exists");
+  const existedUser = await User.findOne({
+    $or: [
+      { email: email?.toLowerCase() },
+      { username: username?.toLowerCase() },
+    ],
+  });
+  if (existedUser) {
+    throw new ApiError(409, "Username or Email is already in use");
   }
-  const user = new User({ username, password });
+  const user = new User({ username, password, email });
   await user.save();
   const createdUser = await User.findById(user._id).select(
     "-password -refreshToken"
@@ -27,13 +33,22 @@ const register = asyncHandler(async (req, res) => {
 });
 
 const login = asyncHandler(async (req, res) => {
-  const { username, password } = req.body;
-  if (!username || !password) {
-    throw new ApiError(400, "Username and password are required fields");
+  const { username, email, password } = req.body;
+  if (!username && !email) {
+    throw new ApiError(400, "Email or Username is required");
   }
-  const user = await User.findOne({ username: username?.toLowerCase() });
-  if (!user || !(await user.isPasswordCorrect(password))) {
-    throw new ApiError(401, "Invalid username or password");
+  const user = await User.findOne({
+    $or: [
+      { username: username?.toLowerCase() },
+      { email: email?.toLowerCase() },
+    ],
+  });
+  if (!user) {
+    throw new ApiError(404, "User does not exist");
+  }
+  const isValidPassword = await user.isPasswordCorrect(password);
+  if (!isValidPassword) {
+    throw new ApiError(401, "Invalid Credentials");
   }
   const { accessToken, refreshToken } = await generateAccessandRefreshTokens(
     user._id
@@ -46,11 +61,10 @@ const login = asyncHandler(async (req, res) => {
     .cookie("accessToken", accessToken, cookieOptions)
     .cookie("refreshToken", refreshToken, cookieOptions)
     .json(
-      new ApiResponse(
-        200,
-        { accessToken, refreshToken },
-        "User logged in Successfully"
-      )
+      new ApiResponse(200, "User logged in Successfully", {
+        accessToken,
+        refreshToken,
+      })
     );
 });
 
@@ -67,12 +81,14 @@ const logout = asyncHandler(async (req, res) => {
       new: true,
     }
   );
-    if (!user) {
-        throw new ApiError(500, "Something went wrong while logging out");
-    }
-    res.clearCookie("accessToken", cookieOptions);
-    res.clearCookie("refreshToken", cookieOptions);
-    return res.status(200).json(new ApiResponse(200, "User logged out successfully"));
+  if (!user) {
+    throw new ApiError(500, "Something went wrong while logging out");
+  }
+  res.clearCookie("accessToken", cookieOptions);
+  res.clearCookie("refreshToken", cookieOptions);
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "User logged out successfully"));
 });
 
-export { register, login, logout };
+export { signup, login, logout };
