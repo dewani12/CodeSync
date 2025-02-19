@@ -1,9 +1,8 @@
 import { useState } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link,useNavigate } from "react-router-dom";
 import google from "../assets/google.svg";
 import earth from "../assets/earth.jpg";
-import { useNavigate } from "react-router-dom";
 import { BACKEND_URI } from "../utils/constants.js"
 
 function Signup() {
@@ -16,13 +15,18 @@ function Signup() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post(`${BACKEND_URI}/users/register`,formData);
+            const response = await axios.post(`${BACKEND_URI}/users/signup`,formData);
             console.log("User sign up successfully", response.data);
-            navigate("/");
+            navigate("/login");
         } catch (error) {
             console.log("Error: ", error);
         }
     };
+    const handleGoogleSignup = async (e) => { 
+        e.preventDefault();
+        window.open(`${BACKEND_URI}/oAuth`, "_self");
+        navigate("/");
+    };   
     return (
         <div className="inter flex h-screen">
             <div className="w-1/2">
@@ -68,7 +72,7 @@ function Signup() {
                     <button type="submit" className="cursor-pointer w-[300px] text-sm bg-black py-2 text-white rounded-sm">Continue &gt;</button>
                 </form>
                 <div className="py-3 text-[10px] w-[300px] text-center">OR</div>
-                <button className="cursor-pointer flex w-[300px] text-sm py-2 px-2 rounded-2xl border border-gray-300">
+                <button onClick={handleGoogleSignup} className="cursor-pointer flex w-[300px] text-sm py-2 px-2 rounded-2xl border border-gray-300">
                     <img className="w-4" src={google} alt="icon" />
                     <span className="text-[12px] ml-2">Sign up with Google</span>
                 </button>

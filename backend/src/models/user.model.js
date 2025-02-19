@@ -12,6 +12,14 @@ const userSchema = new Schema(
       trim: true,
       index: true,
     },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+      index: true,
+    },
     password: {
       type: String,
       required: function () {
@@ -68,6 +76,18 @@ userSchema.methods.generateRefreshToken = function () {
       expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
     }
   );
+};
+userSchema.methods.getResetPasswordToken = function () {
+  const resetToken = jwt.sign(
+    {
+      _id: this._id,
+    },
+    process.env.RESET_PASSWORD_SECRET,
+    {
+      expiresIn: process.env.RESET_PASSWORD_EXPIRY,
+    }
+  );
+  return resetToken;
 };
 
 export const User = mongoose.model("User", userSchema);
