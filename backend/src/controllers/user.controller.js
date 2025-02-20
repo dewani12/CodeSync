@@ -6,7 +6,7 @@ import { generateAccessandRefreshTokens } from "../utils/generateTokens.js";
 import { cookieOptions } from "../constants.js";
 import nodemailer from "nodemailer";
 import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt";
+// import bcrypt from "bcrypt";
 
 const signup = asyncHandler(async (req, res) => {
   const { username, password, email } = req.body;
@@ -98,7 +98,9 @@ const getUserProfile = asyncHandler(async (req, res) => {
   if (!req.user || !req.user._id) {
     throw new ApiError(401, "User is not authenticated");
   }
-  const user = await User.findById(req.user._id).select("-password -refreshToken");
+  const user = await User.findById(req.user._id).select(
+    "-password -refreshToken"
+  );
   if (!user) {
     throw new ApiError(404, "User not found");
   }
@@ -140,8 +142,14 @@ const forgotPassword = asyncHandler(async (req, res) => {
       .status(200)
       .json(new ApiResponse(200, "Password reset link sent successfully"));
   } catch (error) {
-    console.log(error);
-    throw new ApiError(500, "Something went wrong while sending the email");
+    return res
+      .status(error.statusCode || 500)
+      .json(
+        new ApiResponse(
+          error.statusCode || 400,
+          error.message || "Something went wrong while resetting the password"
+        )
+      );
   }
 });
 
@@ -157,16 +165,22 @@ const resetPassword = asyncHandler(async (req, res) => {
     if (!user) {
       throw new ApiError(404, "User not found");
     }
-    const newhashPassword = await bcrypt.hash(password, 12);
-    user.password = newhashPassword;
-    await user.save();
+    // const newhashPassword = await bcrypt.hash(password, 12);
+    user.password = password;
+    const newUser = await user.save({ validateBeforeSave: false });
+    console.log(newUser);
     return res
       .status(200)
       .json(new ApiResponse(200, "Password reset successfully"));
   } catch (error) {
     return res
-      .status(500)
-      .json(new ApiResponse(400, "Something went wrong while resetting the password"));
+      .status(error.statusCode || 500)
+      .json(
+        new ApiResponse(
+          400,
+          error.message || "Something went wrong while resetting the password"
+        )
+      );
   }
 });
 

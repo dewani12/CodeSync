@@ -81,6 +81,7 @@ userSchema.methods.getResetPasswordToken = function () {
   const resetToken = jwt.sign(
     {
       _id: this._id,
+      email: this.email,
     },
     process.env.RESET_PASSWORD_SECRET,
     {
