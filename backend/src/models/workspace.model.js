@@ -8,18 +8,21 @@ const workspaceSchema = new Schema(
       unique: true,
       trim: true,
     },
-    rommId: {
+    language: {
       type: String,
       required: true,
     },
-    members: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "User",
-      },
-    ],
+    visibility: {
+      type: String,
+      enum: ["public", "private"],
+      default: "public",
+    },
+    admin: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
   },
   { timestamps: true }
 );
 
-export default mongoose.model("Workspace", workspaceSchema);
+export const Workspace = mongoose.model("Workspace", workspaceSchema);

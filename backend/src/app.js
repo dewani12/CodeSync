@@ -13,8 +13,10 @@ app.use(cookieParser());
 
 import userRouter from "./routes/user.routes.js";
 import oAuthRouter from "./routes/oAuth.routes.js";
+import workspaceRouter from "./routes/workspace.routes.js";
 
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/oAuth", oAuthRouter);
+app.use("/api/v1/workspace",workspaceRouter);
 
 export default app;
