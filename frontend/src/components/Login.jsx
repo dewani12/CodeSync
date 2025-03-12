@@ -22,7 +22,8 @@ function Signin() {
         password: formData.password,
       });
       console.log("User logged in successfully", response.data);
-      navigate("/");
+      // localStorage.setItem("accessToken", response.data.accessToken);
+      navigate("/dashboard");
     } catch (error) {
       console.log("Error: ", error);
     }
