@@ -20,7 +20,7 @@ function Signin() {
       const response = await axios.post(`${BACKEND_URI}/users/login`, {
         ...userInput,
         password: formData.password,
-      });
+      },{ withCredentials: true });
       console.log("User logged in successfully", response.data);
       navigate("/");
     } catch (error) {
