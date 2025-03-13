@@ -147,7 +147,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
       .json(
         new ApiResponse(
           error.statusCode || 400,
-          error.message || "Something went wrong while resetting the password"
+          error.message || "Something went wrong while sending the reset link"
         )
       );
   }
