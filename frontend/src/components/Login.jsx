@@ -31,7 +31,8 @@ function Signin() {
         { withCredentials: true }
       );
       console.log("User logged in successfully", response.data);
-      navigate("/");
+      // localStorage.setItem("accessToken", response.data.accessToken);
+      navigate("/dashboard");
     } catch (error) {
       alert(error.message);
       console.log("Error: ", error);
