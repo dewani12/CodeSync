@@ -20,10 +20,20 @@ function Signin() {
       const response = await axios.post(`${BACKEND_URI}/users/login`, {
         ...userInput,
         password: formData.password,
+      },{
+        withCredentials: true,
       });
       console.log("User logged in successfully", response.data);
-      // localStorage.setItem("accessToken", response.data.accessToken);
-      navigate("/dashboard");
+      // const {accessToken} = response.data;
+      const res=await axios.get(`${BACKEND_URI}/users/profile`,{
+        withCredentials:true,
+      });
+      const {username} = res.data.data.user;
+      if (username) {
+        navigate(`/dashboard?name=${username}`); // Navigate to dashboard with username
+      } else {
+        console.error("User profile data not found");
+      }
     } catch (error) {
       console.log("Error: ", error);
     }
