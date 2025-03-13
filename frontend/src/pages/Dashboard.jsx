@@ -1,13 +1,36 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { User, Plus, X } from "lucide-react";
-import Create from "../components/Create"; 
+import Create from "../components/Create";
+import axios from "axios";
 
 function Dashboard() {
   const location = useLocation();
   const query = new URLSearchParams(location.search);
   const username = query.get("name");
+  const [loading, setLoading] = useState(false);
+  const [workspaces, setWorkspaces] = useState([]);
   const [isOverlayVisible, setIsOverlayVisible] = useState(false);
+  const loadWorkspaces = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(
+        "http://localhost:5000/api/v1/workspace",
+        {
+          withCredentials: true,
+        }
+      );
+      setWorkspaces(response.data.data.workspaces);
+      console.log("Workspaces: ", response);
+    } catch (error) {
+      console.log("Error: ", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    loadWorkspaces();
+  }, []);
   const openOverlay = () => {
     setIsOverlayVisible(true);
   };
@@ -27,8 +50,10 @@ function Dashboard() {
 
       <div className="flex px-5 gap-4 h-screen">
         <div className="w-1/3 border-r border-gray-600">
-          <div className="font-semibold text-xl mt-2">Hi {username}, What do you want to make?</div>
-          <div 
+          <div className="font-semibold text-xl mt-2">
+            Hi {username}, What do you want to make?
+          </div>
+          <div
             className="py-2 border border-gray-400 w-56 rounded-sm flex justify-center items-center mt-2 hover:bg-[#3D485F] cursor-pointer"
             onClick={openOverlay}
           >
@@ -38,21 +63,29 @@ function Dashboard() {
         </div>
 
         <div className="w-2/3">
-          <div className="text-xl font-semibold mt-2">Your recent workspaces</div>
+          {loading && <p>Loading...</p>}
+          <div className="text-xl font-semibold mt-2">
+            Your recent workspaces
+            <div className="grid grid-cols-3 gap-4 mt-2">
+              {workspaces.map((workspace) => (
+                <div key={workspace._id} className="bg-gray-700 p-4 rounded-md">
+                  <div className="font-semibold">{workspace.name}</div>
+                  <div className="text-sm">{workspace.language}</div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Overlay */}
       {isOverlayVisible && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/40 flex justify-center items-center z-50"
           onClick={closeOverlay}
         >
-          <div
-            className="relative"
-            onClick={(e) => e.stopPropagation()} 
-          >
-            <Create />
+          <div className="relative" onClick={(e) => e.stopPropagation()}>
+            <Create isOverlayVisible = {isOverlayVisible} setIsOverlayVisible={setIsOverlayVisible}/>
             <button
               className="absolute top-2 right-2 text-white cursor-pointer"
               onClick={closeOverlay}
