@@ -1,16 +1,13 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
 import { User, Plus, X } from "lucide-react";
 import Create from "../components/Create";
 import axios from "axios";
 
 function Dashboard() {
-  const location = useLocation();
-  const query = new URLSearchParams(location.search);
-  const username = query.get("name");
   const [loading, setLoading] = useState(false);
   const [workspaces, setWorkspaces] = useState([]);
   const [isOverlayVisible, setIsOverlayVisible] = useState(false);
+  const [username, setUsername] = useState("");
   const loadWorkspaces = async () => {
     setLoading(true);
     try {
@@ -28,8 +25,23 @@ function Dashboard() {
       setLoading(false);
     }
   };
+  const loadUsername = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:5000/api/v1/users/profile",
+        {
+          withCredentials: true,
+        }
+      );
+      setUsername(response.data.data.user.username);
+      console.log("Username: ", response.data.data.user.username);
+    } catch (error) {
+      console.log("Error: ", error);
+    }
+  };
   useEffect(() => {
     loadWorkspaces();
+    loadUsername();
   }, []);
   const openOverlay = () => {
     setIsOverlayVisible(true);
@@ -85,7 +97,10 @@ function Dashboard() {
           onClick={closeOverlay}
         >
           <div className="relative" onClick={(e) => e.stopPropagation()}>
-            <Create isOverlayVisible = {isOverlayVisible} setIsOverlayVisible={setIsOverlayVisible}/>
+            <Create
+              isOverlayVisible={isOverlayVisible}
+              setIsOverlayVisible={setIsOverlayVisible}
+            />
             <button
               className="absolute top-2 right-2 text-white cursor-pointer"
               onClick={closeOverlay}

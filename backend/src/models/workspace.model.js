@@ -25,8 +25,4 @@ const workspaceSchema = new Schema(
   { timestamps: true }
 );
 
-<<<<<<< HEAD
 export const Workspace = mongoose.model("Workspace", workspaceSchema);
-=======
-export const Workspace = mongoose.model("Workspace", workspaceSchema);
->>>>>>> s3
