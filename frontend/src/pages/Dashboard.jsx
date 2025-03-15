@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { User, Plus, X } from "lucide-react";
+import Loader from "../components/Loader.jsx";
 import Create from "../components/Create";
 import axios from "axios";
 
@@ -75,7 +76,7 @@ function Dashboard() {
         </div>
 
         <div className="w-2/3">
-          {loading && <p>Loading...</p>}
+          {loading && Loader}
           <div className="text-xl font-semibold mt-2">
             Your recent workspaces
             <div className="grid grid-cols-3 gap-4 mt-2">
@@ -98,7 +99,8 @@ function Dashboard() {
         >
           <div className="relative" onClick={(e) => e.stopPropagation()}>
             <Create
-              isOverlayVisible={isOverlayVisible}
+              workspaces={workspaces}
+              setWorkspaces={setWorkspaces}
               setIsOverlayVisible={setIsOverlayVisible}
             />
             <button

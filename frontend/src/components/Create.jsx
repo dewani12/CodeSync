@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Plus } from "lucide-react";
 import axios from "axios";
 
-function Create({ isOverlayVisible, setIsOverlayVisible }) {
+function Create({ workspaces, setWorkspaces, setIsOverlayVisible }) {
   const languages = ["C++", "Python", "Java", "C", "JavaScript"];
   const [title, setTitle] = useState("");
   const [privacy, setPrivacy] = useState("public");
@@ -128,6 +128,7 @@ function Create({ isOverlayVisible, setIsOverlayVisible }) {
           withCredentials: true,
         }
       );
+      setWorkspaces([...workspaces, { name: title, language, visibility: privacy }]);
       setIsOverlayVisible(false);
     } catch (error) {
       console.log("Error: ", error);
