@@ -3,7 +3,8 @@ import { useLocation } from "react-router-dom";
 import { User, Plus, X } from "lucide-react";
 import Create from "../components/Create";
 import axios from "axios";
-
+import { BACKEND_URI } from "../utils/constants.js";
+import Card from "../components/Card.jsx";
 function Dashboard() {
   const location = useLocation();
   const query = new URLSearchParams(location.search);
@@ -15,13 +16,13 @@ function Dashboard() {
     setLoading(true);
     try {
       const response = await axios.get(
-        "http://localhost:5000/api/v1/workspace",
+        `${BACKEND_URI}/workspace`,
         {
           withCredentials: true,
         }
       );
       setWorkspaces(response.data.data.workspaces);
-      console.log("Workspaces: ", response);
+      console.log("Workspaces: ", response.data);
     } catch (error) {
       console.log("Error: ", error);
     } finally {
@@ -49,7 +50,7 @@ function Dashboard() {
       </nav>
 
       <div className="flex px-5 gap-4 h-screen">
-        <div className="w-1/3 border-r border-gray-600">
+        <div className="w-1/3 border-r border-gray-600 mr-3">
           <div className="font-semibold text-xl mt-2">
             Hi {username}, What do you want to make?
           </div>
@@ -66,12 +67,14 @@ function Dashboard() {
           {loading && <p>Loading...</p>}
           <div className="text-xl font-semibold mt-2">
             Your recent workspaces
-            <div className="grid grid-cols-3 gap-4 mt-2">
+            <div className="grid grid-cols-3 gap-2 mt-3">
               {workspaces.map((workspace) => (
-                <div key={workspace._id} className="bg-gray-700 p-4 rounded-md">
-                  <div className="font-semibold">{workspace.name}</div>
-                  <div className="text-sm">{workspace.language}</div>
-                </div>
+                <Card
+                  key={workspace._id}
+                  title={workspace.name}
+                  language={workspace.language}
+                  privacy={workspace.visibility}
+                />
               ))}
             </div>
           </div>
@@ -85,7 +88,7 @@ function Dashboard() {
           onClick={closeOverlay}
         >
           <div className="relative" onClick={(e) => e.stopPropagation()}>
-            <Create isOverlayVisible = {isOverlayVisible} setIsOverlayVisible={setIsOverlayVisible}/>
+            <Create setIsOverlayVisible={setIsOverlayVisible}/>
             <button
               className="absolute top-2 right-2 text-white cursor-pointer"
               onClick={closeOverlay}

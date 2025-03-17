@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { Plus } from "lucide-react";
 import axios from "axios";
+import { BACKEND_URI } from "../utils/constants.js";
 
-function Create({ isOverlayVisible, setIsOverlayVisible }) {
+function Create({ setIsOverlayVisible }) {
   const languages = ["C++", "Python", "Java", "C", "JavaScript"];
   const [title, setTitle] = useState("");
   const [privacy, setPrivacy] = useState("public");
@@ -117,8 +118,8 @@ function Create({ isOverlayVisible, setIsOverlayVisible }) {
   }, []);
   const handleCreateWorkspace = async () => {
     try {
-      await axios.post(
-        "http://localhost:5000/api/v1/workspace/createWorkspace",
+      const res = await axios.post(
+        `${BACKEND_URI}/workspace/createWorkspace`,
         {
           name: title,
           visibility: privacy,
@@ -128,6 +129,7 @@ function Create({ isOverlayVisible, setIsOverlayVisible }) {
           withCredentials: true,
         }
       );
+      console.log("Workspace Created", res.data);
       setIsOverlayVisible(false);
     } catch (error) {
       console.log("Error: ", error);
