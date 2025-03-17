@@ -17,7 +17,7 @@ const oAuthCallback = asyncHandler(async (req, res) => {
     .status(200)
     .cookie("accessToken", accessToken, cookieOptions)
     .cookie("refreshToken", refreshToken, cookieOptions)
-  return res.redirect("http://localhost:5000/api/v1/users/profile");
+  return res.redirect("http://localhost:5173/dashboard");
 });
 
 export { oAuthCallback };

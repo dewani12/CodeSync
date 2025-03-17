@@ -1,17 +1,15 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
 import { User, Plus, X } from "lucide-react";
+import Loader from "../components/Loader.jsx";
 import Create from "../components/Create";
 import axios from "axios";
 import { BACKEND_URI } from "../utils/constants.js";
 import Card from "../components/Card.jsx";
 function Dashboard() {
-  const location = useLocation();
-  const query = new URLSearchParams(location.search);
-  const username = query.get("name");
   const [loading, setLoading] = useState(false);
   const [workspaces, setWorkspaces] = useState([]);
   const [isOverlayVisible, setIsOverlayVisible] = useState(false);
+  const [username, setUsername] = useState("");
   const loadWorkspaces = async () => {
     setLoading(true);
     try {
@@ -29,8 +27,23 @@ function Dashboard() {
       setLoading(false);
     }
   };
+  const loadUsername = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:5000/api/v1/users/profile",
+        {
+          withCredentials: true,
+        }
+      );
+      setUsername(response.data.data.user.username);
+      console.log("Username: ", response.data.data.user.username);
+    } catch (error) {
+      console.log("Error: ", error);
+    }
+  };
   useEffect(() => {
     loadWorkspaces();
+    loadUsername();
   }, []);
   const openOverlay = () => {
     setIsOverlayVisible(true);
@@ -64,7 +77,7 @@ function Dashboard() {
         </div>
 
         <div className="w-2/3">
-          {loading && <p>Loading...</p>}
+          {loading && Loader}
           <div className="text-xl font-semibold mt-2">
             Your recent workspaces
             <div className="grid grid-cols-3 gap-2 mt-3">
@@ -88,7 +101,11 @@ function Dashboard() {
           onClick={closeOverlay}
         >
           <div className="relative" onClick={(e) => e.stopPropagation()}>
-            <Create setIsOverlayVisible={setIsOverlayVisible}/>
+            <Create
+              workspaces={workspaces}
+              setWorkspaces={setWorkspaces}
+              setIsOverlayVisible={setIsOverlayVisible}
+            />
             <button
               className="absolute top-2 right-2 text-white cursor-pointer"
               onClick={closeOverlay}
